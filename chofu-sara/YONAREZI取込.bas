@@ -22,8 +22,8 @@ Public Sub YonareziImport()
     ' 2) 開く
     Set wbSrc = Workbooks.Open(srcFile, ReadOnly:=True)
 
-    ' 3) 日報 書き込み
     DoWriteNippo wbSrc
+    DoWriteUriage wbSrc
 
 CloseSrc:
     If Not wbSrc Is Nothing Then wbSrc.Close SaveChanges:=False

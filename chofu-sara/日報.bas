@@ -9,12 +9,13 @@ Public Sub DoWriteNippo(wbSrc As Workbook)
     Dim nippoSheetName As Variant
     Dim wsDst As Worksheet, wsWrite As Worksheet
 
-    ' ソースシート取得
+    ' ---- 1) ソースシート確定 ----
     nippoSheetName = GetSheetName(NIPPO_UID, wbSrc) 
     If IsError(nippoSheetName) Then
         MsgBox "『" & SHEET_NIPPO & "』のソースUIDがメタ情報で見つかりません。", vbExclamation
         Exit Sub
     End If
+
     On Error Resume Next
     Set wsSrcNippo = wbSrc.Sheets(CStr(Trim$(nippoSheetName)))
     On Error GoTo 0
@@ -23,13 +24,14 @@ Public Sub DoWriteNippo(wbSrc As Workbook)
         Exit Sub
     End If
 
-    ' 出力先
+    ' ---- 2) 出力先シート ----
     Set wsDst = ThisWorkbook.Worksheets(SHEET_NIPPO)
-    If EnsureWritable(wsDst, wsWrite) Then
-        WriteNippo wsWrite, wsSrcNippo
-    Else
+    If Not EnsureWritable(wsDst, wsWrite) Then
         MsgBox "『" & SHEET_NIPPO & "』の書込先を準備できませんでした。", vbExclamation
+        Exit Sub
     End If
+
+    WriteNippo wsWrite, wsSrcNippo
 End Sub
 
 ' ソース（社交 | 日報）→ 日報に書き込み
