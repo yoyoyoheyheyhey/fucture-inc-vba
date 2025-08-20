@@ -1,23 +1,39 @@
 Option Explicit
 
-Private Const SRC_START_ROW As Long = 2 ' ソース（社交 | 日報）のデータ開始行
+Private Const SRC_START_ROW As Long = 2 ' ソースのデータ開始行
 Private Const DST_START_ROW As Long = 6 ' 出力先の書き込み開始行
 Private Const TOTAL_FIND_COL As Long = 1 ' 合計行を探す列（A列=1）
 
-' A列から「合」を含むセルを探して、その行番号を返す（見つからなければ 0）
-Private Function FindTotalRow(ByVal ws As Worksheet) As Long
-    Dim f As Range
-    Set f = ws.Columns(TOTAL_FIND_COL).Find(What:="合", LookAt:=xlPart, LookIn:=xlValues, _
-                                            SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
-    If Not f Is Nothing Then
-        FindTotalRow = f.Row
-    Else
-        FindTotalRow = 0
+Public Sub DoWriteNippo(wbSrc As Workbook)
+    Dim wsSrcNippo As Worksheet
+    Dim nippoSheetName As Variant
+    Dim wsDst As Worksheet, wsWrite As Worksheet
+
+    ' ソースシート取得
+    nippoSheetName = GetSheetName(NIPPO_UID, wbSrc) 
+    If IsError(nippoSheetName) Then
+        MsgBox "『" & SHEET_NIPPO & "』のソースUIDがメタ情報で見つかりません。", vbExclamation
+        Exit Sub
     End If
-End Function
+    On Error Resume Next
+    Set wsSrcNippo = wbSrc.Sheets(CStr(Trim$(nippoSheetName)))
+    On Error GoTo 0
+    If wsSrcNippo Is Nothing Then
+        MsgBox "ソースブックにシート '" & CStr(nippoSheetName) & "' がありません。", vbExclamation
+        Exit Sub
+    End If
+
+    ' 出力先
+    Set wsDst = ThisWorkbook.Worksheets(SHEET_NIPPO)
+    If EnsureWritable(wsDst, wsWrite) Then
+        WriteNippo wsWrite, wsSrcNippo
+    Else
+        MsgBox "『" & SHEET_NIPPO & "』の書込先を準備できませんでした。", vbExclamation
+    End If
+End Sub
 
 ' ソース（社交 | 日報）→ 日報に書き込み
-Public Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
+Private Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
     Dim lastRowSrc As Long, i As Long, dstRow As Long
     Dim totalRow As Long, maxRow As Long
 
@@ -106,3 +122,15 @@ Public Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
         End If
     Next i
 End Sub
+
+' A列から「合」を含むセルを探して、その行番号を返す（見つからなければ 0）
+Private Function FindTotalRow(ByVal ws As Worksheet) As Long
+    Dim f As Range
+    Set f = ws.Columns(TOTAL_FIND_COL).Find(What:="合", LookAt:=xlPart, LookIn:=xlValues, _
+                                            SearchOrder:=xlByRows, SearchDirection:=xlNext, MatchCase:=False)
+    If Not f Is Nothing Then
+        FindTotalRow = f.Row
+    Else
+        FindTotalRow = 0
+    End If
+End Function
