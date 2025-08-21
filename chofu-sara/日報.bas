@@ -5,33 +5,11 @@ Private Const DST_START_ROW As Long = 6 ' 出力先の書き込み開始行
 Private Const TOTAL_FIND_COL As Long = 1 ' 合計行を探す列（A列=1）
 
 Public Sub DoWriteNippo(wbSrc As Workbook)
-    Dim wsSrcNippo As Worksheet
-    Dim nippoSheetName As Variant
-    Dim wsDst As Worksheet, wsWrite As Worksheet
+    Dim wsSrc As Worksheet, wsWrite As Worksheet
 
-    ' ---- 1) ソースシート確定 ----
-    nippoSheetName = GetSheetName(NIPPO_UID, wbSrc) 
-    If IsError(nippoSheetName) Then
-        MsgBox "『" & SHEET_NIPPO & "』のソースUIDがメタ情報で見つかりません。", vbExclamation
-        Exit Sub
-    End If
+    If Not ResolveSrcAndDst(wbSrc, NIPPO_UID, SHEET_NIPPO, wsSrc, wsWrite) Then Exit Sub
 
-    On Error Resume Next
-    Set wsSrcNippo = wbSrc.Sheets(CStr(Trim$(nippoSheetName)))
-    On Error GoTo 0
-    If wsSrcNippo Is Nothing Then
-        MsgBox "ソースブックにシート '" & CStr(nippoSheetName) & "' がありません。", vbExclamation
-        Exit Sub
-    End If
-
-    ' ---- 2) 出力先シート ----
-    Set wsDst = ThisWorkbook.Worksheets(SHEET_NIPPO)
-    If Not EnsureWritable(wsDst, wsWrite) Then
-        MsgBox "『" & SHEET_NIPPO & "』の書込先を準備できませんでした。", vbExclamation
-        Exit Sub
-    End If
-
-    WriteNippo wsWrite, wsSrcNippo
+    WriteNippo wsWrite, wsSrc
 End Sub
 
 ' ソース（社交 | 日報）→ 日報に書き込み

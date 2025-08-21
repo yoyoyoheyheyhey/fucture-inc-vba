@@ -139,6 +139,51 @@ ErrHandler:
     GetSheetName = CVErr(xlErrValue)
 End Function
 
+' ソースUIDと出力先シート名（定数）を受けて、
+' ・ソースブック(wbSrc)から該当シートを取得（____meta____参照）
+' ・出力先ThisWorkbookのシートをEnsureWritableで取得
+' 成功時 True を返し、wsSrc / wsWrite にセット
+Public Function ResolveSrcAndDst( _
+    ByVal wbSrc As Workbook, _
+    ByVal uid As String, _
+    ByVal dstSheetName As String, _
+    ByRef wsSrc As Worksheet, _
+    ByRef wsWrite As Worksheet _
+) As Boolean
+
+    Dim shName As Variant
+    Dim wsDst As Worksheet
+
+    Set wsSrc = Nothing
+    Set wsWrite = Nothing
+
+    ' 1) UID→シート名（ソース側）
+    shName = GetSheetName(uid, wbSrc)
+    If IsError(shName) Then
+        MsgBox "メタ情報(____meta____)に UID が見つかりません。" & vbCrLf & _
+               "UID: " & uid, vbExclamation
+        Exit Function
+    End If
+
+    ' 2) ソースシート取得
+    On Error Resume Next
+    Set wsSrc = wbSrc.Sheets(CStr(Trim$(shName)))
+    On Error GoTo 0
+    If wsSrc Is Nothing Then
+        MsgBox "ソースブックにシート '" & CStr(shName) & "' が見つかりません。", vbExclamation
+        Exit Function
+    End If
+
+    ' 3) 出力先（ThisWorkbook）取得 ＋ 書き込み可能化
+    Set wsDst = ThisWorkbook.Worksheets(dstSheetName)
+    If Not EnsureWritable(wsDst, wsWrite) Then
+        MsgBox "出力先シート『" & dstSheetName & "』を書き込み可能にできませんでした。", vbExclamation
+        Exit Function
+    End If
+
+    ResolveSrcAndDst = True
+End Function
+
 ' 名前の簡易正規化：前後スペース削除＋全角スペース→半角
 Private Function CleanName(ByVal s As String) As String
     Dim zsp As String
