@@ -218,7 +218,12 @@ Public Function FindHeaderColumn(ByVal ws As Worksheet, _
     Dim rng As Range, f As Range
     Set rng = ws.Range(leftTop, rightTop)
     Set f = rng.Find(What:=headerName, LookAt:=xlWhole, LookIn:=xlValues)
-    FindHeaderColumn = IIf(f Is Nothing, 0, f.Column)
+
+    If f Is Nothing Then
+        FindHeaderColumn = 0
+    Else
+        FindHeaderColumn = f.Column
+    End If
 End Function
 
 ' 名前の簡易正規化：前後スペース削除＋全角スペース→半角
