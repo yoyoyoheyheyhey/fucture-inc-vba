@@ -11,6 +11,9 @@ Public Const URIAGE_UID As String = "ODA0X2Nob2Z1" ' ODE1X2Nob2Z1
 Public Const DANSHI_HIBARAI_DANSHI_UID As String = "NzEwX2Nob2Z1"
 Public Const DANSHI_HIBARAI_PART_UID As String = "ODAzX2Nob2Z1"
 
+' ソースの対象シート名（経費はリソースWBが別）
+Public Const SHEET_KEIHI As String = "経費"
+
 ' 既知のパスワードを返す（不明なら空文字）
 Public Function GetSheetPassword(ByVal sheetName As String) As String
     Select Case sheetName
