@@ -140,48 +140,85 @@ ErrHandler:
 End Function
 
 ' ソースUIDと出力先シート名（定数）を受けて、
-' ・ソースブック(wbSrc)から該当シートを取得（____meta____参照）
-' ・出力先ThisWorkbookのシートをEnsureWritableで取得
-' 成功時 True を返し、wsSrc / wsWrite にセット
+' - ソースブック(wbSrc)から該当シートを取得（____meta____参照）
+' - 出力先ThisWorkbookのシートをEnsureWritableで取得
+' - wsWriteReuse を渡せば出力先の準備はスキップ（再利用）
+' - silentOnMissing=True なら、ソース未存在時にメッセージなしで False を返す
+' - 成功時 True を返し、wsSrc / wsWrite にセット
 Public Function ResolveSrcAndDst( _
     ByVal wbSrc As Workbook, _
     ByVal uid As String, _
     ByVal dstSheetName As String, _
     ByRef wsSrc As Worksheet, _
-    ByRef wsWrite As Worksheet _
+    ByRef wsWrite As Worksheet, _
+    Optional ByVal wsWriteReuse As Worksheet = Nothing, _
+    Optional ByVal silentOnMissing As Boolean = False _
 ) As Boolean
 
-    Dim shName As Variant
     Dim wsDst As Worksheet
-
     Set wsSrc = Nothing
-    Set wsWrite = Nothing
 
-    ' 1) UID→シート名（ソース側）
-    shName = GetSheetName(uid, wbSrc)
-    If IsError(shName) Then
-        MsgBox "メタ情報(____meta____)に UID が見つかりません。" & vbCrLf & _
-               "UID: " & uid, vbExclamation
-        Exit Function
-    End If
-
-    ' 2) ソースシート取得
-    On Error Resume Next
-    Set wsSrc = wbSrc.Sheets(CStr(Trim$(shName)))
-    On Error GoTo 0
+    ' 1) ソース（静かに取得）
+    Set wsSrc = ResolveSrcSheet(wbSrc, uid)
     If wsSrc Is Nothing Then
-        MsgBox "ソースブックにシート '" & CStr(shName) & "' が見つかりません。", vbExclamation
+        If Not silentOnMissing Then
+            Dim shName As Variant: shName = GetSheetName(uid, wbSrc)
+            If IsError(shName) Then
+                MsgBox "メタ情報(____meta____)に UID が見つかりません。" & vbCrLf & "UID: " & uid, vbExclamation
+            Else
+                MsgBox "ソースブックにシート '" & CStr(shName) & "' が見つかりません。", vbExclamation
+            End If
+        End If
         Exit Function
     End If
 
-    ' 3) 出力先（ThisWorkbook）取得 ＋ 書き込み可能化
-    Set wsDst = ThisWorkbook.Worksheets(dstSheetName)
-    If Not EnsureWritable(wsDst, wsWrite) Then
-        MsgBox "出力先シート『" & dstSheetName & "』を書き込み可能にできませんでした。", vbExclamation
-        Exit Function
+    ' 2) 出力先（再利用が来ていればそれを使う）
+    If Not wsWriteReuse Is Nothing Then
+        Set wsWrite = wsWriteReuse
+    Else
+        Set wsDst = ThisWorkbook.Worksheets(dstSheetName)
+        If Not EnsureWritable(wsDst, wsWrite) Then
+            If Not silentOnMissing Then _
+                MsgBox "出力先シート『" & dstSheetName & "』を書き込み可能にできませんでした。", vbExclamation
+            Exit Function
+        End If
     End If
 
     ResolveSrcAndDst = True
+End Function
+
+
+' ファイル名「<title> YYYY-MM-DD ~ YYYY-MM-DD」から後ろ側の日付を拾う
+' 成功時 True / tgt に日付
+Public Function TryParseEndDateFromFileName(ByVal fileName As String, ByRef tgt As Date) As Boolean
+    Dim re As Object, mc As Object, m As Object
+    Set re = CreateObject("VBScript.RegExp")
+    With re
+        .Pattern = "(\d{4}-\d{2}-\d{2})"
+        .Global = True
+        .IgnoreCase = True
+    End With
+    Set mc = re.Execute(fileName)
+    If mc.Count >= 2 Then
+        Set m = mc(mc.Count - 1) ' 最後の一致（終了日）
+        On Error Resume Next
+        tgt = CDate(m.Value)
+        On Error GoTo 0
+        TryParseEndDateFromFileName = (tgt > 0)
+    Else
+        TryParseEndDateFromFileName = False
+    End If
+End Function
+
+' ヘッダー名から列番号を返す
+Public Function FindHeaderColumn(ByVal ws As Worksheet, _
+                                  ByVal headerName As String, _
+                                  ByVal leftTop As Range, _
+                                  ByVal rightTop As Range) As Long
+    Dim rng As Range, f As Range
+    Set rng = ws.Range(leftTop, rightTop)
+    Set f = rng.Find(What:=headerName, LookAt:=xlWhole, LookIn:=xlValues)
+    FindHeaderColumn = IIf(f Is Nothing, 0, f.Column)
 End Function
 
 ' 名前の簡易正規化：前後スペース削除＋全角スペース→半角
@@ -191,4 +228,18 @@ Private Function CleanName(ByVal s As String) As String
     s = Replace$(s, zsp, " ")
     s = Trim$(s)
     CleanName = s
+End Function
+
+' UID→ソースシート取得（見つからなければ Nothing）
+Private Function ResolveSrcSheet(ByVal wbSrc As Workbook, ByVal uid As String) As Worksheet
+    Dim shName As Variant
+    On Error GoTo Ender
+
+    shName = GetSheetName(uid, wbSrc)
+    If IsError(shName) Then Exit Function
+
+    Set ResolveSrcSheet = wbSrc.Worksheets(CStr(Trim$(shName)))
+    Exit Function
+Ender:
+    Set ResolveSrcSheet = Nothing
 End Function

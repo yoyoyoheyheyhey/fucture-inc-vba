@@ -24,6 +24,7 @@ Public Sub YonareziImport()
 
     DoWriteNippo wbSrc
     DoWriteUriage wbSrc
+    DoWriteDanshiHibarai wbSrc
 
 CloseSrc:
     If Not wbSrc Is Nothing Then wbSrc.Close SaveChanges:=False
