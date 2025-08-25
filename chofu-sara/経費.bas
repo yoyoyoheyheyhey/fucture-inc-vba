@@ -17,9 +17,9 @@ Public Sub DoWriteKeihi(ByVal wbSrc As Workbook)
     End If
 
     ' 2) 出力先（売上日報）を確定・書き込み可能化
-    Set wsDst = ThisWorkbook.Worksheets(SHEET_URIAGE)
+    Set wsDst = ThisWorkbook.Worksheets(SHEET_URIAGE_NIPPO)
     If Not EnsureWritable(wsDst, wsWrite) Then
-        MsgBox "『" & SHEET_URIAGE & "』の書込先を準備できませんでした。", vbExclamation
+        MsgBox "『" & SHEET_URIAGE_NIPPO & "』の書込先を準備できませんでした。", vbExclamation
         Exit Sub
     End If
 
