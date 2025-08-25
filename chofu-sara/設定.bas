@@ -3,6 +3,7 @@ Option Explicit
 ' 出力先シート名
 Public Const SHEET_NIPPO As String = "日報"
 Public Const SHEET_URIAGE_NIPPO As String = "売上日報"
+Public Const SHEET_URIAGE_HYO As String = "売上"
 Public Const SHEET_DANSHI_HIBARAI As String = "男子日払い"
 
 
@@ -21,6 +22,8 @@ Public Function GetSheetPassword(ByVal sheetName As String) As String
         Case SHEET_NIPPO
             GetSheetPassword = ""          ' わかっていればここに設定
         Case SHEET_URIAGE_NIPPO
+            GetSheetPassword = ""          ' 同上
+        Case SHEET_URIAGE_HYO
             GetSheetPassword = ""          ' 同上
         Case SHEET_DANSHI_HIBARAI
             GetSheetPassword = ""          ' 同上

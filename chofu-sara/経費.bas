@@ -42,8 +42,12 @@ Public Sub DoWriteKeihi(ByVal wbSrc As Workbook)
         subCat = wsSrc.Cells(r, "C").Value
         amount = wsSrc.Cells(r, "F").Value
 
-        ' 空行スキップ（主/副/金額すべて空 or 金額=0/空 の場合は好みで調整）
-        If IsEmpty(mainCat) And IsEmpty(subCat) And (IsEmpty(amount) Or amount = 0) Then
+        ' 非現金チェック
+        If CBool(wsSrc.Cells(r, "G").Value) = True Then
+            ' 非現金ならスキップ
+            skipped = skipped + 1
+        ' 空行スキップ
+        ElseIf IsEmpty(mainCat) And IsEmpty(subCat) And (IsEmpty(amount) Or amount = 0) Then
             ' 何もしない
         Else
             If dstRow > cap Then

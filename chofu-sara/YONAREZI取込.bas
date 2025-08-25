@@ -24,6 +24,7 @@ Public Sub YonareziImport()
 
     DoWriteNippo wbSrc
     DoWriteUriageNippo wbSrc
+    DoWriteUriageHyo wbSrc
     DoWriteDanshiHibarai wbSrc
 
 CloseSrc:
