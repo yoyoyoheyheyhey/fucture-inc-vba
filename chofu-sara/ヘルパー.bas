@@ -80,7 +80,7 @@ Public Function GetEmployeeNumber(ByVal role As String, ByVal name As String) As
     ' 検索範囲の最終行
     lastRow = ws.Cells(ws.Rows.Count, nameCol).End(xlUp).Row
     If lastRow < startRow Then
-        GetEmployeeNumber = CVErr(xlErrNA)             ' データなし
+        GetEmployeeNumber = "未登録"  ' データなし
         Exit Function
     End If
 
