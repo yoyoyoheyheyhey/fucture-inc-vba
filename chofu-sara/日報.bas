@@ -14,7 +14,7 @@ End Sub
 
 ' ソース（社交 | 日報）→ 日報に書き込み
 Private Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
-    Dim lastRowSrc As Long, i As Long, dstRow As Long
+    Dim lastRowSrc As Long, r As Long, dstRow As Long
     Dim totalRow As Long, maxRow As Long
 
     ' ソースの最終行（ユーザー=A列基準）
@@ -29,7 +29,7 @@ Private Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
     End If
 
     dstRow = DST_START_ROW
-    For i = SRC_START_ROW To lastRowSrc
+    For r = SRC_START_ROW To lastRowSrc
         If dstRow > maxRow Then Exit For
 
         ' ソースのデータを変数に格納
@@ -39,22 +39,22 @@ Private Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
         Dim drinkBack As Variant, adpPay As Variant, sendingFee As Variant
         Dim uniformFee As Variant, penalty As Variant, honshiSales As Variant
         Dim empNo As Variant
-        name = wsSrc.Cells(i, "A").Value ' 名前
-        startAt = wsSrc.Cells(i, "B").Value ' 出勤
-        endAt = wsSrc.Cells(i, "D").Value ' 退勤
-        honshiP = wsSrc.Cells(i, "F").Value ' 本指P
-        jonaiP = wsSrc.Cells(i, "G").Value ' 場内P
-        extP = wsSrc.Cells(i, "H").Value ' 延長P
-        dohanP = wsSrc.Cells(i, "I").Value ' 同伴P
-        honshiBack = wsSrc.Cells(i, "J").Value ' 本指ﾊﾞｯｸ
-        jonaiBack = wsSrc.Cells(i, "K").Value ' 場内ﾊﾞｯｸ
-        dohanBack = wsSrc.Cells(i, "L").Value ' 同伴ﾊﾞｯｸ
-        drinkBack = wsSrc.Cells(i, "M").Value ' ドリンクバック
-        adpPay = wsSrc.Cells(i, "N").Value ' 日払い
-        sendingFee = wsSrc.Cells(i, "O").Value ' 送り
-        uniformFee = wsSrc.Cells(i, "P").Value ' 制服
-        penalty = wsSrc.Cells(i, "Q").Value ' ﾍﾟﾅﾙﾃｨ
-        honshiSales = wsSrc.Cells(i, "R").Value ' 本指売上
+        name = wsSrc.Cells(r, "A").Value ' 名前
+        startAt = wsSrc.Cells(r, "B").Value ' 出勤
+        endAt = wsSrc.Cells(r, "D").Value ' 退勤
+        honshiP = wsSrc.Cells(r, "F").Value ' 本指P
+        jonaiP = wsSrc.Cells(r, "G").Value ' 場内P
+        extP = wsSrc.Cells(r, "H").Value ' 延長P
+        dohanP = wsSrc.Cells(r, "I").Value ' 同伴P
+        honshiBack = wsSrc.Cells(r, "J").Value ' 本指ﾊﾞｯｸ
+        jonaiBack = wsSrc.Cells(r, "K").Value ' 場内ﾊﾞｯｸ
+        dohanBack = wsSrc.Cells(r, "L").Value ' 同伴ﾊﾞｯｸ
+        drinkBack = wsSrc.Cells(r, "M").Value ' ドリンクバック
+        adpPay = wsSrc.Cells(r, "N").Value ' 日払い
+        sendingFee = wsSrc.Cells(r, "O").Value ' 送り
+        uniformFee = wsSrc.Cells(r, "P").Value ' 制服
+        penalty = wsSrc.Cells(r, "Q").Value ' ﾍﾟﾅﾙﾃｨ
+        honshiSales = wsSrc.Cells(r, "R").Value ' 本指売上
 
         ' --- 空/0判定（全て空や0ならスキップ） ---
         Dim arr As Variant
@@ -100,7 +100,7 @@ Private Sub WriteNippo(ByVal wsWrite As Worksheet, ByVal wsSrc As Worksheet)
 
             dstRow = dstRow + 1
         End If
-    Next i
+    Next r
 End Sub
 
 ' A列から「合」を含むセルを探して、その行番号を返す（見つからなければ 0）

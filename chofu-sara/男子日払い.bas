@@ -1,5 +1,9 @@
 Option Explicit
 
+Private Const SRC_START_ROW As Long = 2 ' ソースのデータ開始行
+Private Const DST_START_ROW As Long = 5 ' 出力先の書き込み開始行
+Private Const DST_LAST_ROW As Long = 35 ' 出力先の書き込み終了行（月ごとに31行分確保している想定）
+
 Public Sub DoWriteDanshiHibarai(ByVal wbSrc As Workbook)
     Dim wsDst As Worksheet, wsWrite As Worksheet, wsSrc As Worksheet
     Dim tgtDate As Date
@@ -32,18 +36,18 @@ Private Sub WriteDanshiHibarai( _
     ByVal wsWrite As Worksheet, _
     ByVal tgtDate As Date)
 
-    Dim lastRow As Long, r As Long
+    Dim lastRowSrc As Long, r As Long
     Dim nm As String, amt As Double
     Dim col As Long, row As Long
     Dim cur As Variant
 
     ' 書き込み先の行（対象日）
-    row = 4 + Day(tgtDate) ' B5が1日目 → 4 + day
-    If row < 5 Or row > 35 Then Exit Sub ' 念のため
+    row = DST_START_ROW + Day(tgtDate) - 1 ' 開始行が1日目, e.g. 対象日が1/5なら1行目からスタートして5日目なので、開始行 + 5 - 1
+    If row < DST_START_ROW Or row > DST_LAST_ROW Then Exit Sub ' 念のため
 
-    lastRow = wsSrc.Cells(wsSrc.Rows.Count, "A").End(xlUp).Row
+    lastRowSrc = wsSrc.Cells(wsSrc.Rows.Count, "A").End(xlUp).Row
 
-    For r = 2 To lastRow ' 1行目はヘッダ
+    For r = SRC_START_ROW To lastRowSrc
         nm = Trim$(CStr(wsSrc.Cells(r, "A").Value))
         If Len(nm) = 0 Then GoTo ContinueLoop
 

@@ -23,7 +23,8 @@ Public Sub YonareziImport()
     Set wbSrc = Workbooks.Open(srcFile, ReadOnly:=True)
 
     DoWriteNippo wbSrc
-    DoWriteUriage wbSrc
+    DoWriteUriageNippo wbSrc
+    DoWriteUriageHyo wbSrc
     DoWriteDanshiHibarai wbSrc
 
 CloseSrc:
